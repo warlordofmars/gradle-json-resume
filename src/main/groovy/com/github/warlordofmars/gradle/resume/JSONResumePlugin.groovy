@@ -25,6 +25,8 @@ class JSONResumePlugin implements Plugin<Project> {
         project.rootProject.plugins.apply('com.github.warlordofmars.gradle.customtest')
 
         project.afterEvaluate {
+
+            
                 
             project.ext.tests = [
 
@@ -58,10 +60,11 @@ class JSONResumePlugin implements Plugin<Project> {
 
 
             def iCloudLocalDir = "${System.env.HOME}/Library/Mobile Documents/com~apple~CloudDocs"
-
+            def TASK_GROUP = 'JSON Resume'
 
             project.task('validateJson') {
-                
+                description 'Confirms resume source is valid JSON'
+                group TASK_GROUP
                 inputs.file(mExtension.resumeSource)
                 dependsOn project.rootProject.registerTests
                 doLast {
@@ -75,7 +78,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('validateResume') {
-                
+                description 'Confirms JSON Resume Scheme in resume source'
+                group TASK_GROUP
                 inputs.file(mExtension.resumeSource)
                 dependsOn project.validateJson, project.checkPrerequisites, project.rootProject.registerTests
                 doFirst {
@@ -93,7 +97,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('spellCheck') {
-                
+                description 'Runs resume source through spell check, ignoring configurable list of words'
+                group TASK_GROUP
                 inputs.file(mExtension.resumeSource)
                 mustRunAfter project.validateResume
                 dependsOn project.checkPrerequisites, project.rootProject.registerTests
@@ -113,7 +118,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('checkUrls') {
-                
+                description 'Finds all URLs mentioned anywhere in resume source, and checks to make sure they are valid URLs and are currently responding'
+                group TASK_GROUP
                 inputs.file(mExtension.resumeSource)
                 mustRunAfter project.validateResume
                 dependsOn project.rootProject.registerTests
@@ -133,7 +139,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('buildResume') {
-
+                description 'Generates new JSON resume from source, dynamically populating version and other metadata variables in the JSON'
+                group TASK_GROUP
                 inputs.file(mExtension.resumeSource)
                 outputs.file("${project.buildDir}/${mExtension.resumeSource}")
                 mustRunAfter project.checkUrls, project.spellCheck
@@ -154,6 +161,8 @@ class JSONResumePlugin implements Plugin<Project> {
 
             mExtension.resumeFormats.each { format ->
                 project.task("build${format.capitalize()}Resume") {
+                    description "Generates ${format} Resume from resume source"
+                    group TASK_GROUP
                     inputs.file("${project.buildDir}/${mExtension.resumeSource}")
                     outputs.file("${project.buildDir}/resume.${format}")
                     dependsOn project.buildResume
@@ -169,7 +178,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('analyzeResume') {
-                
+                description 'Runs some basic content analysis on resume, highlighting keywords mentioned'
+                group TASK_GROUP
                 inputs.file(mExtension.resumeSource)
                 dependsOn project.rootProject.registerTests, project.checkPrerequisites
                 mustRunAfter project.validateResume, project.spellCheck
@@ -191,10 +201,14 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('clean', type:Delete) {
+                description 'Delete all generated files in build directory'
+                group TASK_GROUP
                 delete project.buildDir
             }
 
             project.task('build') {
+                description 'Meta task to run all required tasks to build resume'
+                group TASK_GROUP
                 dependsOn project.validateResume, project.spellCheck, project.checkUrls, project.analyzeResume
                 
             }
@@ -206,6 +220,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('print') {
+                description 'Print pdf version of resume on locally configured printer'
+                group TASK_GROUP
                 mustRunAfter project.build
                 dependsOn project.checkPrerequisites
                 doFirst {
@@ -216,6 +232,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('printPreview') {
+                description 'Open pdf version of resume for viewing locally'
+                group TASK_GROUP
                 dependsOn project.buildPdfResume
                 doFirst {
                     project.exec {
@@ -225,6 +243,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('publishResumeToWeb') {
+                description 'Publish all resume artifacts to the web'
+                group TASK_GROUP
                 mustRunAfter project.build
                 dependsOn project.checkPrerequisites
                 doFirst {
@@ -246,6 +266,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('publishResumeToGoogle') {
+                description 'Publish pdf resume to Google Drive'
+                group TASK_GROUP
                 mustRunAfter project.build
                 dependsOn project.checkPrerequisites
                 doLast {
@@ -282,6 +304,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('publishResumeToApple') {
+                description 'Publish pdf resume to iCloud Drive'
+                group TASK_GROUP
                 mustRunAfter project.build
                 dependsOn project.checkPrerequisites
                 doLast {
@@ -297,7 +321,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('postDeployCheck') {
-                
+                description 'Run a series of simple tests post-deploy to ensure all resources have been deployed as expected'
+                group TASK_GROUP
                 mustRunAfter project.publishResumeToWeb, project.publishResumeToGoogle, project.publishResumeToApple
                 dependsOn project.rootProject.registerTests
                 doFirst {
@@ -363,6 +388,8 @@ class JSONResumePlugin implements Plugin<Project> {
             }
 
             project.task('deploy') {
+                description 'Meta task for running all required tasks for deploying all resume artifacts'
+                group TASK_GROUP
                 dependsOn project.publishResumeToWeb, project.publishResumeToApple, project.publishResumeToGoogle, project.postDeployCheck    
                 if(mExtension.isPromote) {
                     dependsOn project.rootProject.tasks['githubRelease']
