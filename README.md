@@ -38,6 +38,8 @@ npm install -g hackmyresume
 
 ### aspell
 
+[aspell](http://aspell.net/) is used to provide spell-checking functionality.
+
 To install `aspell` utility, run the following:
 
 ```bash
@@ -45,6 +47,8 @@ brew install aspell
 ```
 
 ### awscli
+
+[awscli](https://aws.amazon.com/cli/) is used to copy resumé files to an S3 bucket for publishing to the Web.
 
 To install `awscli` utility, run the following:
 
@@ -54,6 +58,8 @@ brew install awscli
 
 ### wkhtmltopdf
 
+[wkhtmltopdf](https://wkhtmltopdf.org/) is used by `hackmyresume` for PDF generation.
+
 To install the `wkhtmltopdf` utility, run the following:
 
 ```bash
@@ -61,6 +67,8 @@ brew install wkhtmltopdf
 ```
 
 ### gdrive
+
+[gdrive](https://github.com/prasmussen/gdrive) (Google Drive CLI) is used to publish resumé file to Google Drive.
 
 To install the `gdrive` utility, run the following:
 
@@ -93,8 +101,15 @@ To configure:
 
 ```gradle
 resume {
-
-
+    resumeFormats = rootProject.resumeFormats
+    resumeSource = rootProject.resumeSource
+    themes = rootProject.themes
+    websiteUrl = rootProject.websiteUrl
+    websitePrefix = rootProject.websitePrefix
+    numberOfCopies = rootProject.numberOfCopies
+    ensureStrings = rootProject.ensureStrings
+    spellCheckIgnoreList = rootProject.spellCheckIgnoreList
+    isPromote = rootProject.isPromote
 }
 ```
 
