@@ -1,6 +1,6 @@
 # gradle-json-resume
 
-[![](https://jitpack.io/v/warlordofmars/gradle-json-resume.svg)](https://jitpack.io/#warlordofmars/gradle-json-resume)
+[![jitpack build](https://jitpack.io/v/warlordofmars/gradle-json-resume.svg)](https://jitpack.io/#warlordofmars/gradle-json-resume)
 
 ## Overview
 
@@ -14,13 +14,12 @@ Gradle Plugin to provide a full CI/CD workflow for a [JSON Resume](https://jsonr
 * **Multi-Forrmat Build** - Resumé source can be compiled into a number of different output formats:  HTML, PDF, Markdown, YAML
 * **Custom Resumé Themes** - Each configured output format can be configured to use a custom [JSON Resume Theme](https://jsonresume.org/themes/)
 * **Resumé Deployment** - Resumé will be deployed to several locations for ultimate consumpton:
-    * **Web** - Resumé is published to a static website hosted in AWS S3
-    * **Google Drive** - Resumé is published to a Google Drive document
-    * **iCloud** - Resumé is published to a iCloud Drive document
-    * **Print** - Resumé is printed using a local printer
+  * **Web** - Resumé is published to a static website hosted in AWS S3
+  * **Google Drive** - Resumé is published to a Google Drive document
+  * **iCloud** - Resumé is published to a iCloud Drive document
+  * **Print** - Resumé is printed using a local printer
 
 * **Test Results** - All tests that are performed throughout the `build` and `deploy` process are captured and recorded in a JUnit-style XML report.
-
 
 ## Prerequisites
 
@@ -101,9 +100,20 @@ To configure:
 
 ```gradle
 resume {
-    resumeFormats = rootProject.resumeFormats
-    resumeSource = rootProject.resumeSource
-    themes = rootProject.themes
+
+    // list of resume formats to be generated (must contain 'html' and 'pdf')
+    resumeFormats = ['html', 'pdf', 'yaml', 'md']
+
+    // the JSON Resume source file
+    resumeSource = 'resume.json'
+
+    // mapping of themes to be used with each resumeFormat configured
+    themes = [
+        html: '',
+        pdf: ''
+    ]
+
+
     websiteUrl = rootProject.websiteUrl
     websitePrefix = rootProject.websitePrefix
     numberOfCopies = rootProject.numberOfCopies
@@ -127,4 +137,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* 
+* Using [gdrive](https://github.com/prasmussen/gdrive) (Google Drive CLI) to publish resumé file to Google Drive.
