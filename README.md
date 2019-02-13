@@ -109,17 +109,27 @@ resume {
 
     // mapping of themes to be used with each resumeFormat configured
     themes = [
-        html: '',
-        pdf: ''
+        html: 'theme/node_modules/jsonresume-theme-class/',
+        pdf: 'theme/node_modules/jsonresume-theme-short/',
     ]
 
+    // file containing list of words to ignore during spell check
+    spellCheckIgnoreList = 'spell_check_ignore.txt'
 
-    websiteUrl = rootProject.websiteUrl
-    websitePrefix = rootProject.websitePrefix
-    numberOfCopies = rootProject.numberOfCopies
-    ensureStrings = rootProject.ensureStrings
-    spellCheckIgnoreList = rootProject.spellCheckIgnoreList
-    isPromote = rootProject.isPromote
+    // full domain name of website resume will be deployed to
+    websiteUrl = 'some.domain.name'
+
+    // prefix to prepend to assets deployed to s3 website (useful for versioned folders)
+    websitePrefix = ''
+
+    // number of copies of resume to print
+    numberOfCopies = 10
+
+    // list of strings to look for in deployed resume, used in post-deploy validation
+    ensureStrings = ['My Full Name', 'my@email.com', 'Some important phrase that can\'t be missed!']
+
+    // whether or not current build is part of a promote step
+    isPromote = System.env.containsKey('PROMOTE')
 }
 ```
 
@@ -137,4 +147,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
+* [JSON Resume Schema](https://jsonresume.org/schema/) is the schema on which all of this is based
 * Using [gdrive](https://github.com/prasmussen/gdrive) (Google Drive CLI) to publish resumé file to Google Drive.
+* Using [awscli](https://aws.amazon.com/cli/) to copy resumé files to an S3 bucket for publishing to the Web.
+* Using [aspell](http://aspell.net/) to provide spell-checking functionality.
+* Using [hackmyresume](https://github.com/hacksalot/HackMyResume) to do the actual JSON Resume build.
