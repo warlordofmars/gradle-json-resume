@@ -146,7 +146,7 @@ class JSONResumePlugin implements Plugin<Project> {
                 mustRunAfter project.checkUrls, project.spellCheck
                 doLast {
                     def resumeFile = project.file(mExtension.resumeSource)
-                    def resumeLastModified = new Date(resumeFile.lastModified()).format('YYYY-MM-DD\'T\'hh:mm:ss\'Z\'', TimeZone.getTimeZone('GMT'))
+                    def resumeLastModified = new Date(resumeFile.lastModified())
                     def resumeObj = new JsonSlurper().parseText(resumeFile.text)
                     resumeObj['meta'] = [ 
                         version: project.rootProject.version,
