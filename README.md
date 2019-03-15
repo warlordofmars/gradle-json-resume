@@ -65,16 +65,6 @@ To install the `wkhtmltopdf` utility, run the following:
 brew install wkhtmltopdf
 ```
 
-### gdrive
-
-[gdrive](https://github.com/prasmussen/gdrive) (Google Drive CLI) is used to publish resumé file to Google Drive.
-
-To install the `gdrive` utility, run the following:
-
-```bash
-brew install gdrive
-```
-
 ## Setup
 
 To use this plugin, the following buildscript repositories and dependencies must be configured:
@@ -148,7 +138,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * [JSON Resume Schema](https://jsonresume.org/schema/) is the schema on which all of this is based
-* Using [gdrive](https://github.com/prasmussen/gdrive) (Google Drive CLI) to publish resumé file to Google Drive.
+* Using [gradle-google-drive-plugin](https://github.com/valnaumov/gradle-google-drive-plugin) to publish resumé file to Google Drive.
 * Using [awscli](https://aws.amazon.com/cli/) to copy resumé files to an S3 bucket for publishing to the Web.
 * Using [aspell](http://aspell.net/) to provide spell-checking functionality.
 * Using [hackmyresume](https://github.com/hacksalot/HackMyResume) to do the actual JSON Resume build.
