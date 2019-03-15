@@ -9,6 +9,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonBuilder
 import java.util.TimeZone
 import java.io.ByteArrayOutputStream
+import org.gradle.api.GradleException
 
 import com.github.warlordofmars.gradle.resume.JSONResumeExtension
 
@@ -22,6 +23,7 @@ class JSONResumePlugin implements Plugin<Project> {
         mExtension = project.extensions.create('resume', JSONResumeExtension)
 
         project.plugins.apply('com.github.warlordofmars.gradle.prerequisites')
+        project.plugins.apply('ru.kinca.google-drive-uploader')
         project.rootProject.plugins.apply('com.github.warlordofmars.gradle.customtest')
 
         project.afterEvaluate {
@@ -32,7 +34,6 @@ class JSONResumePlugin implements Plugin<Project> {
 
                 ensureStringsTest: [mExtension.resumeSource, 'Expected Strings Found in Deployed HTML Resume'],
                 resumeDeployedWebTest: [mExtension.resumeSource, 'Deployed Resumes Are Web Accessible'],
-                resumeDeployedGoogleTest: [mExtension.resumeSource, 'Resume Deployed to Google Drive'],
                 resumeDeployedAppleTest: [mExtension.resumeSource, 'Resume Deployed to iCloud Drive'],
                 
                 ensureStringsProdTest: [mExtension.resumeSource, 'Expected Strings Found in Deployed HTML Resume in Production'],
@@ -48,14 +49,11 @@ class JSONResumePlugin implements Plugin<Project> {
 
             ]
 
-
             project.ext.prerequisites << [
                 'hackmyresume': 'Install via \'npm install -g hackmyresume\'',
                 'aspell': 'Install via \'brew install aspell\'',
-                'lp': 'This is a built-in that should already be there.  Why isn\'t it there?',
                 'aws': 'Install via \'brew install awscli\'',
                 'wkhtmltopdf': 'Install via \'brew install wkhtmltopdf\'',
-                'gdrive': 'Install via \'brew install gdrive\'',
             ]
 
 
@@ -265,42 +263,18 @@ class JSONResumePlugin implements Plugin<Project> {
                 }
             }
 
+            project.googleDrive {
+                destinationFolderPath = mExtension.isPromote ? "/" : "resume-v${project.rootProject.version}"
+                file = project.file("${project.buildDir}/resume.pdf")
+                clientId = project.getProperty('google.api.client_id')
+                clientSecret = project.getProperty('google.api.client_secret')
+            }
+
             project.task('publishResumeToGoogle') {
                 description 'Publish pdf resume to Google Drive'
                 group TASK_GROUP
                 mustRunAfter project.build
-                dependsOn project.checkPrerequisites
-                doLast {
-
-                    def out = new ByteArrayOutputStream()
-                    project.exec {
-                        commandLine 'gdrive', 'list', '--no-header', '-q', "name = 'resume.v${project.rootProject.version}.pdf'"
-                        standardOutput out
-                    }
-
-                    out.toString().readLines().each {
-                        def fileId = it.split(" ")[0]
-                        project.exec {
-                            commandLine 'gdrive', 'delete', fileId
-                        }
-                    }
-
-                    project.exec {
-                        commandLine 'gdrive', 'upload', '--name', "resume.v${project.rootProject.version}.pdf", "${project.buildDir}/resume.pdf"
-                    }
-
-                    if(mExtension.isPromote) {
-                        def out2 = new ByteArrayOutputStream()
-                        project.exec {
-                            commandLine 'gdrive', 'list', '--no-header', '-q', 'name = "resume.pdf"'
-                            standardOutput out2
-                        }
-                        def fileId = out2.toString().split(" ")[0]
-                        project.exec {
-                            commandLine 'gdrive', 'update', fileId, "${project.buildDir}/resume.pdf"
-                        }
-                    }
-                }
+                dependsOn project.uploadToDrive
             }
 
             project.task('publishResumeToApple') {
@@ -329,7 +303,6 @@ class JSONResumePlugin implements Plugin<Project> {
 
                     def ensureStringsTestObj = project.rootProject.ensureStringsTest
                     def resumeDeployedWebTestObj = project.rootProject.resumeDeployedWebTest
-                    def resumeDeployedGoogleTestObj = project.rootProject.resumeDeployedGoogleTest
                     def resumeDeployedAppleTestObj = project.rootProject.resumeDeployedAppleTest
 
                     def resumeFileName = "resume.v${project.rootProject.version}.pdf"
@@ -337,7 +310,6 @@ class JSONResumePlugin implements Plugin<Project> {
                     if(mExtension.isPromote) {
                         ensureStringsTestObj = project.rootProject.ensureStringsProdTest
                         resumeDeployedWebTestObj = project.rootProject.resumeDeployedWebProdTest
-                        resumeDeployedGoogleTestObj = project.rootProject.resumeDeployedGoogleProdTest
                         resumeDeployedAppleTestObj = project.rootProject.resumeDeployedAppleProdTest
                         resumeFileName = 'resume.pdf'
                     }
@@ -364,18 +336,6 @@ class JSONResumePlugin implements Plugin<Project> {
                         }
                     }
                     resumeDeployedWebTestObj.success("All resume formats have been deployed successfully and are currently web-accessible at the following URLs:\n\n${urlList.join('\n')}")
-
-                    def out = new ByteArrayOutputStream()
-                    project.exec {
-                        commandLine 'gdrive', 'list', '--no-header', '-q', "name = '${resumeFileName}'"
-                        standardOutput out
-                    }
-
-                    if(out.toString().split(" ").size() > 1) {
-                        resumeDeployedGoogleTestObj.success("${resumeFileName} is available in Google Drive")
-                    } else {
-                        resumeDeployedGoogleTestObj.failure('Resume Not Found in Google Drive', "${resumeFileName} is not found in Google Drive")
-                    }
 
 
                     if(project.file("${iCloudLocalDir}/resume.v${project.rootProject.version}.pdf").exists()) {
